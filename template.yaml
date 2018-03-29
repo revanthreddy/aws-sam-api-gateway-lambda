@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: A starter API gateway AWS Lambda function.
+Resources:
+#  SamApiGatewayLambda:
+#    Type: 'AWS::Serverless::Function'
+#    Properties:
+#      FunctionName: sam_api_gateway_lambda_function
+#      Handler: index.lambda_handler
+#      Runtime: python3.6
+#      CodeUri: app/
+#      Role: !GetAtt SamApiGatewayLambdaRole.Arn
+#      Description: lambda to write API
+#      MemorySize: 128
+#      Timeout: 3
+  GetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.get
+      Runtime: python3.6
+      CodeUri: app/
+      Role: !GetAtt SamApiGatewayLambdaRole.Arn
+      Description: lambda to write API GET
+      Environment:
+        Variables:
+          TABLE_NAME: dude1
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /resource/{resourceId}
+            Method: get
+
+  PostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.post
+      Runtime: python3.6
+      CodeUri: app/
+      Role: !GetAtt SamApiGatewayLambdaRole.Arn
+      Description: lambda to write API POST
+      Environment:
+        Variables:
+          TABLE_NAME: dude2
+      Events:
+        PostResource:
+          Type: Api
+          Properties:
+            Path: /resource
+            Method: post
+
+
+  SamApiGatewayLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      RoleName: sam-api-gateway-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: sam-api-gateway-lambda-role-log-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:CreateLogGroup
+                  - logs:PutLogEvents
+                Resource:
+                  - arn:aws:logs:*:*:*
